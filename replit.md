@@ -2,7 +2,7 @@
 
 ## Overview
 
-Event Hub is a full-stack web application that provides a tier-based event access system. Users can view and access events based on their subscription tier (Free, Silver, Gold, Platinum), with higher tiers unlocking premium events. The application features user authentication via Replit's OAuth system and a modern React frontend with shadcn/ui components.
+Event Hub is a modern full-stack web application that provides a tier-based event access system. Users can view and access events based on their subscription tier (Free, Silver, Gold, Platinum), with higher tiers unlocking more exclusive events. The application features user authentication, responsive design, and an interactive upgrade system for testing different access levels.
 
 ## User Preferences
 
@@ -11,100 +11,95 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS with shadcn/ui component library
-- **State Management**: TanStack Query (React Query) for server state
-- **Routing**: Wouter for client-side routing
-- **Build Tool**: Vite for development and production builds
+- **React 18** with TypeScript for component-based UI development
+- **Tailwind CSS** with shadcn/ui component library for styling and design system consistency
+- **TanStack Query** for efficient server state management and data fetching
+- **Wouter** for lightweight client-side routing
+- **Vite** for fast development builds and hot module replacement
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js
-- **Language**: TypeScript with ES modules
-- **Authentication**: Replit OAuth with Passport.js
-- **Session Management**: Express sessions with PostgreSQL storage
-- **Database ORM**: Drizzle ORM with Neon PostgreSQL
+- **Node.js** with Express.js for the REST API server
+- **TypeScript** with ES modules for type safety and modern JavaScript features
+- **Session-based authentication** using Passport.js with local strategy
+- **RESTful API design** with clear separation of concerns
 
 ### Database Design
-- **Primary Database**: PostgreSQL (configured for Neon serverless)
-- **Schema Management**: Drizzle Kit for migrations
-- **Key Tables**:
-  - `users`: User profiles with tier information
-  - `events`: Events with tier-based access control
-  - `sessions`: Session storage for authentication
+- **PostgreSQL** as the primary database
+- **Drizzle ORM** for type-safe database operations and schema management
+- **Session storage** in PostgreSQL using connect-pg-simple for persistent sessions
 
 ## Key Components
 
 ### Authentication System
-- **OAuth Provider**: Replit OpenID Connect
-- **Session Storage**: PostgreSQL-backed sessions using connect-pg-simple
-- **Security Features**: HTTP-only cookies, CSRF protection, secure session management
-- **User Management**: Automatic user creation/updates on login
+- Custom username/password authentication using Passport.js Local Strategy
+- Password hashing with Node.js crypto scrypt function
+- Session-based authentication with PostgreSQL session store
+- Authentication middleware for protected routes
 
-### Tier System
-- **Tiers**: Free, Silver, Gold, Platinum (hierarchical access)
-- **Access Control**: Events are filtered based on user tier
-- **Upgrade Flow**: In-app tier upgrade simulation (modal-based)
+### Tier-Based Access Control
+- Four-tier system: Free, Silver, Gold, Platinum
+- Hierarchical access (higher tiers include all lower tier events)
+- Dynamic event filtering based on user tier
+- Interactive tier upgrade system for testing
 
-### Event Management
-- **Event Display**: Card-based layout with tier indicators
-- **Access Control**: Locked events show upgrade prompts
-- **Data Seeding**: Automatic event creation on server startup
+### Database Schema
+- **Users table**: Stores user credentials, profile info, and tier level
+- **Events table**: Contains event details with tier requirements
+- **Sessions table**: Manages user sessions (required for authentication)
 
-### UI/UX Components
-- **Design System**: shadcn/ui with Radix UI primitives
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Interactive Elements**: Toast notifications, modals, dropdown menus
-- **Loading States**: Skeleton loaders and proper loading indicators
+### Frontend State Management
+- TanStack Query for server state caching and synchronization
+- React Context for authentication state
+- Form management with React Hook Form and Zod validation
 
 ## Data Flow
 
-1. **Authentication Flow**: User authenticates via Replit OAuth → Session created → User data upserted to database
-2. **Event Access Flow**: User tier retrieved → Events filtered by tier → Client receives accessible events
-3. **Upgrade Flow**: User selects new tier → API validates request → Database updated → Client state refreshed
+1. **User Authentication**: Login/register → session creation → user context update
+2. **Event Loading**: User tier verification → filtered event query → display with access controls
+3. **Tier Upgrades**: Tier selection → database update → event list refresh → access level changes
 
 ## External Dependencies
 
-### Core Dependencies
-- **@neondatabase/serverless**: PostgreSQL connection for serverless environments
-- **drizzle-orm**: Type-safe database ORM
-- **@tanstack/react-query**: Server state management
-- **express**: Backend web framework
-- **passport**: Authentication middleware
+### Frontend Dependencies
+- **@radix-ui**: Comprehensive component primitives for accessible UI
+- **@tanstack/react-query**: Server state management and caching
+- **@hookform/resolvers**: Form validation integration
+- **lucide-react**: Icon library for consistent iconography
+- **date-fns**: Date manipulation and formatting
 
-### UI Dependencies
-- **@radix-ui/***: Accessible UI primitives
-- **tailwindcss**: Utility-first CSS framework
-- **lucide-react**: Icon library
-- **wouter**: Lightweight React router
+### Backend Dependencies
+- **passport & passport-local**: Authentication strategy implementation
+- **connect-pg-simple**: PostgreSQL session store integration
+- **drizzle-orm**: Type-safe ORM for database operations
+- **@neondatabase/serverless**: Serverless PostgreSQL driver
 
 ### Development Tools
-- **vite**: Frontend build tool and dev server
-- **tsx**: TypeScript execution for development
-- **esbuild**: Production backend bundling
+- **Vite**: Build tool and development server
+- **TypeScript**: Static type checking
+- **Tailwind CSS**: Utility-first CSS framework
+- **ESLint & Prettier**: Code quality and formatting
 
 ## Deployment Strategy
 
 ### Build Process
-- **Frontend**: Vite builds React app to `dist/public`
-- **Backend**: esbuild bundles Express server to `dist/index.js`
-- **Database**: Drizzle Kit manages schema migrations
+- Frontend builds to `dist/public` using Vite
+- Backend bundles to `dist/index.js` using esbuild
+- Environment-specific configuration through `.env` files
+
+### Database Requirements
+- PostgreSQL instance with connection string in `DATABASE_URL`
+- Automatic schema synchronization with `npm run db:push`
+- Session table creation handled automatically by connect-pg-simple
 
 ### Environment Configuration
-- **Development**: Uses tsx for hot reloading, Vite dev server
-- **Production**: Compiled JavaScript bundle with static file serving
-- **Database**: Requires `DATABASE_URL` environment variable
+- `DATABASE_URL`: PostgreSQL connection string
+- `SESSION_SECRET`: Secret key for session encryption
+- `NODE_ENV`: Environment mode (development/production)
 
-### Hosting Requirements
-- **Runtime**: Node.js environment with ES module support
-- **Database**: PostgreSQL database (optimized for Neon)
-- **Environment Variables**: 
-  - `DATABASE_URL`: PostgreSQL connection string
-  - `SESSION_SECRET`: Session encryption key
-  - `REPL_ID`: Replit authentication identifier
-  - `ISSUER_URL`: OAuth issuer endpoint
+### Local Development
+- Single command setup with `npm run dev`
+- Database seeding with sample events on startup
+- Hot module replacement for frontend development
+- Automatic TypeScript compilation and error checking
 
-### Security Considerations
-- Session-based authentication with secure cookies
-- Environment variable protection for sensitive data
-- Database connection pooling for scalability
-- CORS and security headers configuration
+The application follows a clean architecture pattern with clear separation between presentation, business logic, and data layers. The tier-based access system is implemented through database-level filtering rather than client-side restrictions, ensuring security and proper access control.

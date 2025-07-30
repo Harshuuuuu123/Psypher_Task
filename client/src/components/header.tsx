@@ -1,93 +1,117 @@
 import { useState } from "react";
-import { Crown, User, LogOut, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { User as UserType } from "@shared/schema";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import { Crown, LogOut, Settings, User as UserIcon, Zap } from "lucide-react";
+import type { User } from "@shared/schema";
 
 interface HeaderProps {
-  user: UserType;
+  user: User;
   onUpgrade: () => void;
 }
 
-const tierColors = {
-  free: "bg-gray-100 text-gray-800",
-  silver: "bg-slate-100 text-slate-800",
-  gold: "bg-yellow-100 text-yellow-800", 
-  platinum: "bg-purple-100 text-purple-800"
-};
-
 export function Header({ user, onUpgrade }: HeaderProps) {
-  const handleSignOut = () => {
-    window.location.href = '/api/logout';
+  const { logoutMutation } = useAuth();
+  
+  const tierColors = {
+    free: "bg-gray-100 text-gray-800",
+    silver: "bg-slate-100 text-slate-800", 
+    gold: "bg-yellow-100 text-yellow-800",
+    platinum: "bg-purple-100 text-purple-800"
   };
 
-  const displayName = user.firstName && user.lastName 
-    ? `${user.firstName} ${user.lastName}`
-    : user.email || 'User';
+  const tierIcons = {
+    free: null,
+    silver: <Zap className="w-3 h-3" />,
+    gold: <Crown className="w-3 h-3" />, 
+    platinum: <Crown className="w-3 h-3" />
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
+  const getInitials = (firstName?: string | null, lastName?: string | null, username?: string) => {
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    }
+    if (firstName) {
+      return firstName[0].toUpperCase();
+    }
+    if (username) {
+      return username.slice(0, 2).toUpperCase();
+    }
+    return "U";
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <div className="flex items-center">
             <h1 className="text-2xl font-bold text-gray-900">Event Hub</h1>
           </div>
-          
-          <div className="flex items-center space-x-4">
-            {/* Current Tier Badge */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Current Tier:</span>
-              <Badge className={tierColors[user.tier]}>
-                <span className={`w-2 h-2 rounded-full mr-2 ${
-                  user.tier === 'free' ? 'bg-gray-600' :
-                  user.tier === 'silver' ? 'bg-slate-600' :
-                  user.tier === 'gold' ? 'bg-yellow-600' :
-                  'bg-purple-600'
-                }`}></span>
-                {user.tier}
-              </Badge>
-            </div>
 
-            {/* User Profile Dropdown */}
+          {/* User Section */}
+          <div className="flex items-center space-x-4">
+            {/* Tier Badge */}
+            <Badge className={`${tierColors[user.tier]} flex items-center gap-1`}>
+              {tierIcons[user.tier]}
+              {user.tier.charAt(0).toUpperCase() + user.tier.slice(1)} Tier
+            </Badge>
+
+            {/* Upgrade Button */}
+            {user.tier !== "platinum" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onUpgrade}
+                className="border-blue-300 text-blue-600 hover:bg-blue-50"
+              >
+                <Crown className="w-4 h-4 mr-1" />
+                Upgrade
+              </Button>
+            )}
+
+            {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-3">
-                  {user.profileImageUrl ? (
-                    <img 
-                      src={user.profileImageUrl} 
-                      alt="Profile" 
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                      <User className="w-4 h-4 text-gray-600" />
-                    </div>
-                  )}
-                  <span className="hidden sm:block font-medium">{displayName}</span>
-                  <ChevronDown className="w-4 h-4" />
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-blue-100 text-blue-600">
+                      {getInitials(user.firstName, user.lastName, user.username)}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={onUpgrade}>
-                  <Crown className="w-4 h-4 mr-2 text-purple-500" />
-                  Upgrade Tier
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium text-sm">
+                      {user.firstName && user.lastName 
+                        ? `${user.firstName} ${user.lastName}`
+                        : user.username
+                      }
+                    </p>
+                    {user.email && (
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    )}
+                  </div>
+                </div>
+                <DropdownMenuItem>
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <User className="w-4 h-4 mr-2" />
-                  Profile Settings
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

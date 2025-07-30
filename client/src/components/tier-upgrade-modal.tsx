@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Crown } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Crown, Star, Users, Zap, Check, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -14,119 +16,206 @@ interface TierUpgradeModalProps {
   currentTier: Tier;
 }
 
-const tierInfo = {
-  silver: { price: "$19/mo", level: 1 },
-  gold: { price: "$29/mo", level: 2 },
-  platinum: { price: "$99/mo", level: 3 }
-};
-
 export function TierUpgradeModal({ isOpen, onClose, currentTier }: TierUpgradeModalProps) {
-  const [selectedTier, setSelectedTier] = useState<Tier>("gold");
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
+
+  const tiers = [
+    {
+      name: "free" as Tier,
+      title: "Free",
+      price: "$0",
+      icon: <Users className="w-5 h-5" />,
+      color: "bg-gray-100 text-gray-800",
+      features: [
+        "Community events access",
+        "Basic networking opportunities", 
+        "Public workshops",
+        "Event calendar"
+      ]
+    },
+    {
+      name: "silver" as Tier,
+      title: "Silver",
+      price: "$29",
+      icon: <Zap className="w-5 h-5" />,
+      color: "bg-slate-100 text-slate-800",
+      features: [
+        "Everything in Free",
+        "Premium workshops",
+        "Wine tasting events",
+        "Priority event booking",
+        "Networking meetups"
+      ]
+    },
+    {
+      name: "gold" as Tier, 
+      title: "Gold",
+      price: "$59",
+      icon: <Crown className="w-5 h-5" />,
+      color: "bg-yellow-100 text-yellow-800",
+      features: [
+        "Everything in Silver",
+        "VIP networking events",
+        "Industry leader sessions",
+        "Exclusive workshops",
+        "1-on-1 mentoring"
+      ]
+    },
+    {
+      name: "platinum" as Tier,
+      title: "Platinum", 
+      price: "$99",
+      icon: <Crown className="w-5 h-5" />,
+      color: "bg-purple-100 text-purple-800",
+      features: [
+        "Everything in Gold",
+        "Exclusive summit access",
+        "C-level executive events",
+        "Private dining experiences",
+        "Concierge service"
+      ]
+    }
+  ];
 
   const upgradeMutation = useMutation({
-    mutationFn: async (tier: Tier) => {
-      await apiRequest("PATCH", "/api/user/tier", { tier });
+    mutationFn: async (newTier: Tier) => {
+      const response = await apiRequest("PATCH", "/api/user/tier", { tier: newTier });
+      return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Tier Upgraded Successfully!",
-        description: `You've been upgraded to ${selectedTier} tier.`,
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      toast({
+        title: "Tier upgraded successfully!",
+        description: `Welcome to ${selectedTier?.charAt(0).toUpperCase()}${selectedTier?.slice(1)} tier. You now have access to more exclusive events.`,
+      });
       onClose();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
-        title: "Upgrade Failed",
+        title: "Upgrade failed",
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const handleUpgrade = () => {
-    upgradeMutation.mutate(selectedTier);
-  };
+  const tierHierarchy = { free: 0, silver: 1, gold: 2, platinum: 3 };
+  const currentTierIndex = tierHierarchy[currentTier];
 
-  const currentTierLevel = tierInfo[currentTier as keyof typeof tierInfo]?.level ?? 0;
+  const handleUpgrade = () => {
+    if (selectedTier) {
+      upgradeMutation.mutate(selectedTier);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Crown className="text-white text-2xl" />
-          </div>
-          <DialogTitle className="text-2xl text-center">Upgrade Your Tier</DialogTitle>
-          <DialogDescription className="text-center">
-            Unlock access to premium events
+          <DialogTitle className="text-2xl">Upgrade Your Tier</DialogTitle>
+          <DialogDescription>
+            Choose a higher tier to unlock access to more exclusive events and premium features.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {(["silver", "gold", "platinum"] as const).map((tier) => {
-            const info = tierInfo[tier];
-            const isCurrentTier = tier === currentTier;
-            const isLowerTier = info.level <= currentTierLevel;
-            
-            if (isLowerTier) return null;
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          {tiers.map((tier, index) => {
+            const isCurrentTier = tier.name === currentTier;
+            const isUpgrade = index > currentTierIndex;
+            const isSelected = selectedTier === tier.name;
 
             return (
               <Card 
-                key={tier}
-                className={`cursor-pointer transition-colors ${
-                  selectedTier === tier 
-                    ? tier === "platinum" 
-                      ? "border-purple-300 bg-purple-50" 
-                      : "border-yellow-300 bg-yellow-50"
-                    : "border-gray-200 hover:border-gray-300"
+                key={tier.name} 
+                className={`relative cursor-pointer transition-all ${
+                  isCurrentTier 
+                    ? "border-blue-300 bg-blue-50" 
+                    : isSelected 
+                    ? "border-green-300 bg-green-50 ring-2 ring-green-200"
+                    : isUpgrade
+                    ? "border-gray-200 hover:border-gray-300"
+                    : "border-gray-100 opacity-60"
                 }`}
-                onClick={() => setSelectedTier(tier)}
+                onClick={() => isUpgrade && setSelectedTier(tier.name)}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-gray-900 flex items-center">
-                        <span className={`w-3 h-3 rounded-full mr-2 ${
-                          tier === "silver" ? "bg-slate-500" :
-                          tier === "gold" ? "bg-yellow-500" :
-                          "bg-purple-600"
-                        }`}></span>
-                        {tier.charAt(0).toUpperCase() + tier.slice(1)} Tier
-                        {tier === "platinum" && (
-                          <span className="ml-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-                            PREMIUM
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Access to {tier} and below events
-                        {tier === "platinum" && " including exclusive ones"}
-                      </p>
-                    </div>
-                    <span className="text-xl font-bold text-gray-900">{info.price}</span>
+                {isCurrentTier && (
+                  <div className="absolute -top-3 left-4">
+                    <Badge className="bg-blue-600 text-white">Current</Badge>
                   </div>
+                )}
+                
+                {isSelected && (
+                  <div className="absolute -top-3 right-4">
+                    <Badge className="bg-green-600 text-white">
+                      <Check className="w-3 h-3 mr-1" />
+                      Selected
+                    </Badge>
+                  </div>
+                )}
+
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {tier.icon}
+                      <CardTitle className="text-lg">{tier.title}</CardTitle>
+                    </div>
+                    <Badge className={tier.color}>{tier.name}</Badge>
+                  </div>
+                  <CardDescription className="text-2xl font-bold text-gray-900">
+                    {tier.price}<span className="text-sm font-normal text-gray-600">/month</span>
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                  <ul className="space-y-2">
+                    {tier.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start text-sm">
+                        <Check className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             );
           })}
         </div>
 
-        <div className="flex space-x-3 pt-4">
-          <Button variant="outline" className="flex-1" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button 
-            className="flex-1 bg-purple-600 hover:bg-purple-700" 
-            onClick={handleUpgrade}
-            disabled={upgradeMutation.isPending}
-          >
-            {upgradeMutation.isPending ? "Upgrading..." : "Upgrade Now"}
-          </Button>
-        </div>
+        {selectedTier && (
+          <div className="flex items-center justify-between pt-6 border-t">
+            <div>
+              <p className="text-sm text-gray-600">
+                Upgrading to <span className="font-semibold capitalize">{selectedTier}</span> tier
+              </p>
+              <p className="text-xs text-gray-500">
+                This is a demo upgrade. In production, this would integrate with a payment system.
+              </p>
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpgrade}
+                disabled={upgradeMutation.isPending}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {upgradeMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Upgrading...
+                  </>
+                ) : (
+                  `Upgrade to ${selectedTier?.charAt(0).toUpperCase()}${selectedTier?.slice(1)}`
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

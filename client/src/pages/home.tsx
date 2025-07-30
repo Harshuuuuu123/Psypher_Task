@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import { Header } from "@/components/header";
 import { EventCard } from "@/components/event-card";
 import { TierUpgradeModal } from "@/components/tier-upgrade-modal";
@@ -13,24 +11,8 @@ import { AlertTriangle, Info } from "lucide-react";
 import type { Event } from "@shared/schema";
 
 export default function Home() {
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, authLoading, toast]);
 
   const { 
     data: events = [], 
@@ -39,47 +21,9 @@ export default function Home() {
     refetch: refetchEvents
   } = useQuery<Event[]>({
     queryKey: ["/api/events"],
-    enabled: isAuthenticated && !!user,
+    enabled: !!user,
     retry: false,
   });
-
-  // Handle unauthorized errors at endpoint level
-  useEffect(() => {
-    if (eventsError && isUnauthorizedError(eventsError as Error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [eventsError, toast]);
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="animate-pulse">
-          <div className="h-16 bg-white border-b border-gray-200"></div>
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array(6).fill(0).map((_, i) => (
-                <div key={i} className="bg-white rounded-xl p-6">
-                  <Skeleton className="h-48 w-full mb-4" />
-                  <Skeleton className="h-4 w-3/4 mb-2" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (!user) {
     return null;
@@ -146,7 +90,7 @@ export default function Home() {
         )}
 
         {/* Error State */}
-        {eventsError && !isUnauthorizedError(eventsError as Error) && (
+        {eventsError && (
           <div className="text-center py-12">
             <AlertTriangle className="w-16 h-16 text-red-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Failed to Load Events</h3>

@@ -1,7 +1,7 @@
-import { Calendar, Lock } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Calendar, Users, Lock, Crown, Star, Zap } from "lucide-react";
 import { format } from "date-fns";
 import type { Event, Tier } from "@shared/schema";
 
@@ -11,78 +11,71 @@ interface EventCardProps {
   onUpgrade: () => void;
 }
 
-const tierColors = {
-  free: "bg-gray-100 text-gray-800",
-  silver: "bg-slate-100 text-slate-800", 
-  gold: "bg-yellow-100 text-yellow-800",
-  platinum: "bg-purple-100 text-purple-800"
-};
-
-const tierOrder = { free: 0, silver: 1, gold: 2, platinum: 3 };
-
 export function EventCard({ event, userTier, onUpgrade }: EventCardProps) {
-  const isLocked = tierOrder[event.tier] > tierOrder[userTier];
+  const tierHierarchy = { free: 0, silver: 1, gold: 2, platinum: 3 };
+  const hasAccess = tierHierarchy[userTier] >= tierHierarchy[event.tier];
+  
+  const tierColors = {
+    free: "bg-gray-100 text-gray-800",
+    silver: "bg-slate-100 text-slate-800",
+    gold: "bg-yellow-100 text-yellow-800", 
+    platinum: "bg-purple-100 text-purple-800"
+  };
+
+  const tierIcons = {
+    free: <Users className="w-3 h-3" />,
+    silver: <Zap className="w-3 h-3" />,
+    gold: <Crown className="w-3 h-3" />,
+    platinum: <Crown className="w-3 h-3" />
+  };
 
   return (
-    <Card className={`overflow-hidden hover:shadow-lg transition-shadow duration-300 ${isLocked ? 'opacity-60' : ''}`}>
-      <div className="relative">
-        <img 
-          src={event.imageUrl} 
-          alt={event.title}
-          className="w-full h-48 object-cover"
-        />
-        {isLocked && (
-          <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-4 text-center">
-              <Lock className="text-yellow-500 text-2xl mb-2 mx-auto" />
-              <p className="text-sm font-medium text-gray-900">Upgrade to {event.tier}</p>
-              <p className="text-xs text-gray-600">to access this event</p>
-            </div>
+    <Card className={`relative overflow-hidden transition-all hover:shadow-md ${hasAccess ? "" : "opacity-75"}`}>
+      {!hasAccess && (
+        <div className="absolute inset-0 bg-black/5 flex items-center justify-center z-10">
+          <div className="bg-white rounded-full p-3 shadow-lg">
+            <Lock className="w-6 h-6 text-gray-600" />
           </div>
-        )}
-      </div>
+        </div>
+      )}
       
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">{event.title}</h3>
-          <Badge className={tierColors[event.tier]}>
-            <span className={`w-2 h-2 rounded-full mr-1.5 ${
-              event.tier === 'free' ? 'bg-gray-600' :
-              event.tier === 'silver' ? 'bg-slate-600' :
-              event.tier === 'gold' ? 'bg-yellow-600' :
-              'bg-purple-600'
-            }`}></span>
-            {event.tier}
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="text-lg font-semibold mb-2">{event.title}</CardTitle>
+            <CardDescription className="line-clamp-2">
+              {event.description}
+            </CardDescription>
+          </div>
+          <Badge className={`${tierColors[event.tier]} flex items-center gap-1 ml-2`}>
+            {tierIcons[event.tier]}
+            {event.tier.charAt(0).toUpperCase() + event.tier.slice(1)}
           </Badge>
         </div>
-        
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{event.description}</p>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center text-gray-500 text-sm">
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center text-sm text-gray-600">
             <Calendar className="w-4 h-4 mr-2" />
-            <span>{format(new Date(event.eventDate), "MMM d, yyyy")}</span>
+            {format(new Date(event.eventDate), "MMM d, yyyy 'at' h:mm a")}
           </div>
-          
-          {isLocked ? (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={onUpgrade}
-              className="text-yellow-600 hover:text-yellow-700 border-yellow-300"
-            >
-              Upgrade to View
-            </Button>
-          ) : (
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="text-blue-600 hover:text-blue-700"
-            >
-              View Details
-            </Button>
-          )}
         </div>
+
+        {hasAccess ? (
+          <Button className="w-full bg-blue-600 hover:bg-blue-700">
+            View Details
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+            onClick={onUpgrade}
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Upgrade to Access
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

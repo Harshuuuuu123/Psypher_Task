@@ -11,8 +11,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed events on startup
   await storage.seedEvents();
 
-  // Events routes
+  // Events routes - Get all events (for display with access control)
   app.get("/api/events", isAuthenticated, async (req: any, res) => {
+    try {
+      const events = await storage.getAllEvents();
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  // Get events accessible to user tier (for filtered view)
+  app.get("/api/events/accessible", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
@@ -24,8 +35,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const events = await storage.getEventsForTier(user.tier);
       res.json(events);
     } catch (error) {
-      console.error("Error fetching events:", error);
-      res.status(500).json({ message: "Failed to fetch events" });
+      console.error("Error fetching accessible events:", error);
+      res.status(500).json({ message: "Failed to fetch accessible events" });
     }
   });
 

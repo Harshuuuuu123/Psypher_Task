@@ -102,14 +102,17 @@ export default function Home() {
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Exclusive Events</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Events</h1>
             <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
               <Calendar className="h-4 w-4" />
               <span className="text-sm">
-                {events.length} event{events.length !== 1 ? 's' : ''} available
+                {events.length} event{events.length !== 1 ? 's' : ''} total
               </span>
             </div>
           </div>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Discover events across all tiers. Upgrade your membership to unlock premium experiences.
+          </p>
         </div>
 
         {/* Loading State */}
@@ -141,17 +144,108 @@ export default function Home() {
           </div>
         )}
 
-        {/* Events Grid */}
+        {/* Events by Tier */}
         {!eventsLoading && !eventsError && events.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                userTier={user.tier}
-                onUpgrade={() => setIsUpgradeModalOpen(true)}
-              />
-            ))}
+          <div className="space-y-12">
+            {/* Free Tier Events */}
+            {events.filter(e => e.tier === 'free').length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-green-600" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Free Events</h2>
+                  </div>
+                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                    Open to All
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {events.filter(e => e.tier === 'free').map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      userTier={user.tier}
+                      onUpgrade={() => setIsUpgradeModalOpen(true)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Silver Tier Events */}
+            {events.filter(e => e.tier === 'silver').length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-gray-600" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Silver Events</h2>
+                  </div>
+                  <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+                    Silver Tier & Above
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {events.filter(e => e.tier === 'silver').map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      userTier={user.tier}
+                      onUpgrade={() => setIsUpgradeModalOpen(true)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Gold Tier Events */}
+            {events.filter(e => e.tier === 'gold').length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-yellow-600" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Gold Events</h2>
+                  </div>
+                  <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                    Gold Tier & Above
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {events.filter(e => e.tier === 'gold').map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      userTier={user.tier}
+                      onUpgrade={() => setIsUpgradeModalOpen(true)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Platinum Tier Events */}
+            {events.filter(e => e.tier === 'platinum').length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-purple-600" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Platinum Events</h2>
+                  </div>
+                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                    Platinum Tier Only
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {events.filter(e => e.tier === 'platinum').map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      userTier={user.tier}
+                      onUpgrade={() => setIsUpgradeModalOpen(true)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
 

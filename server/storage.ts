@@ -58,6 +58,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Event operations
+  async getAllEvents(): Promise<Event[]> {
+    return await db.select().from(events).orderBy(
+      sql`CASE 
+        WHEN ${events.tier} = 'free' THEN 1
+        WHEN ${events.tier} = 'silver' THEN 2  
+        WHEN ${events.tier} = 'gold' THEN 3
+        WHEN ${events.tier} = 'platinum' THEN 4
+      END, ${events.eventDate}`
+    );
+  }
+
   async getEventsForTier(userTier: Tier): Promise<Event[]> {
     const tierOrder = { free: 0, silver: 1, gold: 2, platinum: 3 };
     const userTierLevel = tierOrder[userTier];
@@ -70,6 +81,13 @@ export class DatabaseStorage implements IStorage {
         WHEN ${events.tier} = 'gold' THEN 2
         WHEN ${events.tier} = 'platinum' THEN 3
       END <= ${userTierLevel}`
+    ).orderBy(
+      sql`CASE 
+        WHEN ${events.tier} = 'free' THEN 1
+        WHEN ${events.tier} = 'silver' THEN 2  
+        WHEN ${events.tier} = 'gold' THEN 3
+        WHEN ${events.tier} = 'platinum' THEN 4
+      END, ${events.eventDate}`
     );
   }
 

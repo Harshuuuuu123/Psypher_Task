@@ -79,11 +79,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async seedEvents(): Promise<void> {
-    // Check if events already exist
-    const existingEvents = await db.select().from(events).limit(1);
-    if (existingEvents.length > 0) {
-      return; // Events already seeded
-    }
+    // Always seed events (for development)
+    await db.delete(events);
 
     const seedEvents: InsertEvent[] = [
       // Free Tier Events

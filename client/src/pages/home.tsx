@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "@/components/header";
 import { EventCard } from "@/components/event-card";
 import { TierUpgradeModal } from "@/components/tier-upgrade-modal";
+import { Logo } from "@/components/logo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Crown, User, LogOut, Calendar, AlertTriangle, Info } from "lucide-react";
 import type { Event } from "@shared/schema";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   const { 
@@ -29,47 +31,85 @@ export default function Home() {
     return null;
   }
 
-  const tierMessages = {
-    free: "You have access to Free tier events only",
-    silver: "You have access to Silver tier events and below", 
-    gold: "You have access to Gold tier events and below",
-    platinum: "You have access to all events including exclusive ones"
+  const getTierColor = (tier: string) => {
+    switch (tier) {
+      case "platinum": return "bg-purple-100 text-purple-800 border-purple-200";
+      case "gold": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "silver": return "bg-gray-100 text-gray-800 border-gray-200";
+      default: return "bg-green-100 text-green-800 border-green-200";
+    }
+  };
+
+  const getTierIcon = (tier: string) => {
+    switch (tier) {
+      case "platinum": return <Crown className="h-4 w-4" />;
+      case "gold": return <Crown className="h-4 w-4" />;
+      case "silver": return <Crown className="h-4 w-4" />;
+      default: return <User className="h-4 w-4" />;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header user={user} onUpgrade={() => setIsUpgradeModalOpen(true)} />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <Logo size="md" />
+            
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Welcome back, {user.firstName || user.username}!
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Your tier:</span>
+                  <Badge className={`${getTierColor(user.tier)} flex items-center gap-1`}>
+                    {getTierIcon(user.tier)}
+                    <span className="capitalize">{user.tier}</span>
+                  </Badge>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => setIsUpgradeModalOpen(true)}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                <Crown className="h-4 w-4 mr-2" />
+                Upgrade Tier
+              </Button>
+              
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-orange-100 text-orange-800">
+                  {(user.firstName?.[0] || user.username[0]).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => logoutMutation.mutate()}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Available Events</h2>
-          <p className="text-gray-600 mb-4">Discover events available for your tier and below</p>
-          
-          {/* Tier Info Banner */}
-          {user.tier !== "platinum" && (
-            <Card className="bg-blue-50 border-blue-200 mb-6">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Info className="text-blue-500 mr-3 flex-shrink-0" />
-                    <div>
-                      <p className="text-blue-900 font-medium">{tierMessages[user.tier]}</p>
-                      <p className="text-blue-700 text-sm">
-                        Upgrade to {user.tier === "free" ? "Silver" : user.tier === "silver" ? "Gold" : "Platinum"} or higher for access to more exclusive events
-                      </p>
-                    </div>
-                  </div>
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setIsUpgradeModalOpen(true)}
-                  >
-                    Upgrade
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Exclusive Events</h1>
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm">
+                {events.length} event{events.length !== 1 ? 's' : ''} available
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Loading State */}

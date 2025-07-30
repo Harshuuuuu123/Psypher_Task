@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Logo } from "@/components/logo";
 import { Calendar, Users, Star, Crown } from "lucide-react";
 
 export default function Landing() {
@@ -37,7 +38,7 @@ export default function Landing() {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <h1 className="text-2xl font-bold text-gray-900">Event Hub</h1>
+            <Logo size="md" />
             <Button onClick={() => window.location.href = '/auth'}>
               Sign In
             </Button>

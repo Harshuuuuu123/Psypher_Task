@@ -48,7 +48,7 @@ export function EventCard({ event, userTier, onUpgrade }: EventCardProps) {
   const { day, date } = formatEventDate(event.eventDate.toString());
 
   return (
-    <Card className={`relative overflow-hidden transition-all hover:shadow-lg ${hasAccess ? "" : "opacity-75"} bg-white`}>
+    <Card className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 ${hasAccess ? "" : "opacity-75"} bg-white group`}>
       {!hasAccess && (
         <div className="absolute inset-0 bg-black/10 flex items-center justify-center z-10">
           <div className="bg-white rounded-full p-3 shadow-lg">
@@ -58,28 +58,28 @@ export function EventCard({ event, userTier, onUpgrade }: EventCardProps) {
       )}
       
       {/* Event Image */}
-      <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative">
+      <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
         <img
           src={event.imageUrl}
           alt={event.title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
         
         {/* Date Badge */}
-        <div className="absolute top-4 left-4 bg-white rounded-lg p-2 text-center shadow-md">
+        <div className="absolute top-4 left-4 bg-white rounded-lg p-2 text-center shadow-md transition-transform duration-300 group-hover:scale-105">
           <div className="text-xs font-medium text-gray-600">{day}</div>
           <div className="text-lg font-bold text-gray-900">{date}</div>
         </div>
         
         {/* Tier Badge */}
-        <Badge className={`absolute top-4 right-4 ${tierColors[event.tier]} flex items-center gap-1`}>
+        <Badge className={`absolute top-4 right-4 ${tierColors[event.tier]} flex items-center gap-1 transition-transform duration-300 group-hover:scale-105`}>
           {tierIcons[event.tier]}
           {event.tier.charAt(0).toUpperCase() + event.tier.slice(1)}
         </Badge>
         
         {/* Price Badge */}
-        <div className="absolute bottom-4 right-4 bg-white rounded-lg px-3 py-1 shadow-md">
-          <span className="text-lg font-bold text-gray-900">{hasAccess ? getEventPrice(event.tier) : getEventPrice(event.tier)}</span>
+        <div className="absolute bottom-4 right-4 bg-white rounded-lg px-3 py-1 shadow-md transition-transform duration-300 group-hover:scale-105">
+          <span className="text-lg font-bold text-gray-900">{getEventPrice(event.tier)}</span>
         </div>
       </div>
       
@@ -103,9 +103,9 @@ export function EventCard({ event, userTier, onUpgrade }: EventCardProps) {
         </div>
 
         <Button 
-          className={`w-full ${hasAccess 
-            ? "bg-slate-800 hover:bg-slate-900 text-white" 
-            : "bg-orange-600 hover:bg-orange-700 text-white"
+          className={`w-full transition-all duration-300 ${hasAccess 
+            ? "bg-slate-800 hover:bg-slate-900 text-white hover:shadow-lg" 
+            : "bg-orange-600 hover:bg-orange-700 text-white hover:shadow-lg hover:scale-[1.02]"
           }`}
           onClick={hasAccess ? undefined : onUpgrade}
         >

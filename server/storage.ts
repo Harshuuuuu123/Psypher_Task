@@ -86,6 +86,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     const seedEvents: InsertEvent[] = [
+      // Free Tier Events
       {
         title: "Community Music Festival",
         description: "Join us for an amazing evening of local music and community celebration. Free entry for all music lovers!",
@@ -101,6 +102,22 @@ export class DatabaseStorage implements IStorage {
         tier: "free",
       },
       {
+        title: "Tech Meetup & Networking",
+        description: "Connect with local developers and tech enthusiasts. Pizza and drinks provided. Perfect for beginners!",
+        eventDate: new Date("2025-01-08T18:30:00Z"),
+        imageUrl: "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        tier: "free",
+      },
+      {
+        title: "Yoga in the Park",
+        description: "Start your weekend with relaxing yoga session in Central Park. Bring your own mat and enjoy nature!",
+        eventDate: new Date("2025-01-11T08:00:00Z"),
+        imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        tier: "free",
+      },
+      
+      // Silver Tier Events
+      {
         title: "Exclusive Business Workshop",
         description: "Advanced entrepreneurship workshop with industry leaders. Limited to Silver members and above.",
         eventDate: new Date("2025-01-05T14:00:00Z"),
@@ -115,17 +132,49 @@ export class DatabaseStorage implements IStorage {
         tier: "silver",
       },
       {
+        title: "Culinary Masterclass",
+        description: "Learn from Michelin-starred chefs in this hands-on cooking experience. Limited to 20 participants.",
+        eventDate: new Date("2025-01-18T15:00:00Z"),
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        tier: "silver",
+      },
+      
+      // Gold Tier Events
+      {
         title: "VIP Networking Gala",
-        description: "High-profile networking event with industry executives and thought leaders.",
+        description: "High-profile networking event with industry executives and thought leaders. Black-tie dress code.",
         eventDate: new Date("2025-01-25T19:30:00Z"),
         imageUrl: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
         tier: "gold",
       },
       {
+        title: "Private Art Auction",
+        description: "Exclusive art auction featuring rare pieces from renowned artists. Champagne reception included.",
+        eventDate: new Date("2025-02-02T18:00:00Z"),
+        imageUrl: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        tier: "gold",
+      },
+      {
+        title: "Investment Summit",
+        description: "Meet with top-tier investors and venture capitalists. Pitch opportunities for qualified startups.",
+        eventDate: new Date("2025-02-15T10:00:00Z"),
+        imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        tier: "gold",
+      },
+      
+      // Platinum Tier Events
+      {
         title: "Exclusive Members Summit",
-        description: "Ultra-exclusive summit with C-level executives and industry pioneers. Platinum members only.",
+        description: "Ultra-exclusive summit with Fortune 500 CEOs and industry pioneers. Platinum members only.",
         eventDate: new Date("2025-02-10T09:00:00Z"),
         imageUrl: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        tier: "platinum",
+      },
+      {
+        title: "Private Jet Experience",
+        description: "Luxury travel experience to exclusive destination with world-class amenities and networking.",
+        eventDate: new Date("2025-03-05T06:00:00Z"),
+        imageUrl: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
         tier: "platinum",
       },
     ];

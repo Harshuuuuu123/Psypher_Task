@@ -1,0 +1,11 @@
+# Copy this content to a new .env file in your project root
+# Replace YOUR_NEON_DATABASE_URL with your actual Neon database connection string
+
+DATABASE_URL=YOUR_NEON_DATABASE_URL
+SESSION_SECRET=super-secret-session-key-make-this-very-long-and-random-at-least-32-characters
+
+# Example Neon URL format:
+# DATABASE_URL=postgresql://username:password@ep-xyz.us-east-1.aws.neon.tech/dbname?sslmode=require
+
+# The SESSION_SECRET should be a long random string for security
+# You can generate one using: openssl rand -base64 32

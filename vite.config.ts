@@ -32,6 +32,8 @@ export default defineConfig({
     fs: {
       strict: true,
       deny: ["**/.*"],
+
     },
   },
+  base : process.env.VITE_BASE_URL || "/Psypher_Task",
 });
